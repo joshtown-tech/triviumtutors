@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+/* Trivium Tutors brand tokens. Ink navy carries text and structure, gold is an
+   accent only (it is too light for body text on cream), cream is the page. */
+:root {
+  --cream: #fbf8f1;
+  --paper: #ffffff;
+  --sand: #f3ecdd;
+  --ink: #14284b;
+  --ink-soft: #3a4a68;
+  --muted: #5b6577;
+  --line: #e3dccb;
+  --gold: #d9a441;
+  --gold-deep: #8a6a1e;
+  --danger: #a3341f;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-gold: var(--gold);
+  --color-gold-deep: var(--gold-deep);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-serif: var(--font-fraunces), Georgia, serif;
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}

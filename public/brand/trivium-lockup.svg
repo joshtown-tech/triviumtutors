@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="Trivium Tutors">
+  <rect width="64" height="64" rx="15" fill="#14284B"/>
+  <rect x="13" y="30" width="10" height="20" rx="2" fill="#FBF8F1"/>
+  <rect x="27" y="22" width="10" height="28" rx="2" fill="#FBF8F1"/>
+  <rect x="41" y="13" width="10" height="37" rx="2" fill="#D9A441"/>
+  <rect x="10" y="52.5" width="44" height="2.5" rx="1.25" fill="#FBF8F1" opacity=".55"/>
+  <text x="80" y="40" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="30" font-weight="600" fill="#14284B">Trivium <tspan fill="#8A6A1E" font-weight="500">Tutors</tspan></text>
+</svg>
