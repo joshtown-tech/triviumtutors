@@ -30,6 +30,7 @@ export default function Privacy() {
         <li>OpenAI, which receives the text of your request so an automated check can tell whether it is genuine and something we offer. We do not use it to profile you or for marketing.</li>
         <li>Resend, which delivers our emails.</li>
         <li>Slack, where our team is notified of new requests.</li>
+        <li>Supabase, the database where we keep a copy of each request.</li>
         <li>Our website hosting provider.</li>
       </ul>
       <p>Some of these providers are based outside your country, including in the United States. Where required, transfers rely on the safeguards those providers offer, such as standard contractual clauses.</p>
@@ -38,7 +39,7 @@ export default function Privacy() {
       <p>An automated system screens each request. It can decline a request for something we do not do, such as taking an exam for you. If you think it got it wrong, email us and a person will review it.</p>
 
       <h2>How long we keep it</h2>
-      <p>We do not keep requests in a separate database. They exist in our email and team chat. We keep them for as long as we need to handle your request and our own records, and delete them when you ask.</p>
+      <p>We keep a copy of each request in a database, and in our email and team chat, for as long as we need to handle your request and our own records. We delete it when you ask.</p>
 
       <h2>Your rights</h2>
       <p>Depending on where you live (for example under the UK and EU GDPR, the Australian Privacy Act, or California law), you can ask to see, correct, delete or export your information, object to how we use it, or complain to your local data protection authority. Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> and we will respond within 30 days.</p>

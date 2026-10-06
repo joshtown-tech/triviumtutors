@@ -5,6 +5,7 @@ import { verifyTurnstile } from "@/lib/turnstile";
 import { screenRequest } from "@/lib/screening";
 import { notifyTeam, sendReceipt } from "@/lib/notify";
 import { serviceById } from "@/lib/services";
+import { saveRequest } from "@/lib/store";
 
 // POST /api/request: the whole intake pipeline in one place.
 //   parse -> bot checks -> rate limit -> Turnstile -> screen -> notify
@@ -46,19 +47,23 @@ export async function POST(req: Request) {
 
   if (screening.verdict === "reject") {
     console.log(`[request] ${id} dropped as spam: ${screening.reasons.join("; ")}`);
+    await saveRequest(id, input, screening, false);
     return RECEIVED(id, route);
   }
 
   if (screening.verdict === "declined") {
     console.log(`[request] ${id} declined (integrity): ${screening.reasons.join("; ")}`);
+    await saveRequest(id, input, screening, false);
     return NextResponse.json({ status: "declined", id, route });
   }
 
-  const delivered = await notifyTeam({ id, input, screening });
-  if (!delivered) {
-    console.error(`[request] ${id} could not be delivered to the team on any channel`);
+  const notified = await notifyTeam({ id, input, screening });
+  const stored = await saveRequest(id, input, screening, notified);
+  if (!notified && !stored) {
+    console.error(`[request] ${id} could not be delivered or saved on any channel`);
     return NextResponse.json({ error: "We could not send your request just now. Please try again in a minute, or email us directly." }, { status: 502 });
   }
+  if (!notified) console.error(`[request] ${id} was SAVED but the team was NOT notified, check the requests table`);
 
   // The receipt is a courtesy and also quietly proves the email address works.
   await sendReceipt({ id, input, screening });

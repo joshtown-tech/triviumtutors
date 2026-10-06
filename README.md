@@ -2,7 +2,7 @@
 
 Request-intake website for triviumtutors.com. A visitor picks a service, answers a few questions, and the team is notified by email and/or Slack. Spam and out-of-scope requests are filtered before anyone is bothered.
 
-Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, OpenAI. No database: the email and the Slack message are the record.
+Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, OpenAI, Supabase. Email and Slack tell the team; Supabase keeps a backup copy of every request.
 
 ## How a request flows
 

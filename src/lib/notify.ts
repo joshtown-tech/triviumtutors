@@ -138,8 +138,9 @@ export async function notifyTeam(l: Lead): Promise<boolean> {
     }
   }
 
-  if (!resend && !hook) {
+  if (!resend && !hook && process.env.NODE_ENV !== "production") {
     // Local development with nothing configured: show what would have been sent.
+    // Never in production, where "nobody was told" must not look like success.
     console.log(`\n[notify] (no email or Slack configured) ${subject}\n${slackText(l)}\n`);
     return true;
   }
