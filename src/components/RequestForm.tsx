@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { CONTACT_PREFS, COUNTRIES, LEVELS, SERVICES, STYLES, serviceById, type ServiceId } from "@/lib/services";
+import {
+  CAREER_ITEMS, DOC_TYPES, EDIT_LEVELS, EDIT_MAX_WORDS, EDIT_MIN_WORDS, HOUR_DISCOUNTS, HOURLY, MAX_HOURS, PAYMENT_METHODS, TURNAROUNDS,
+  addonsFor, estimate, turnaroundProblem, usd,
+} from "@/lib/pricing";
 import { Turnstile, turnstileOn } from "@/components/Turnstile";
 
 type Form = {
@@ -11,8 +15,16 @@ type Form = {
   level: string;
   deadline: string;
   details: string;
+  docType: string;
+  editLevel: string;
   wordCount: string;
   style: string;
+  turnaround: string;
+  addons: string[];
+  hours: string;
+  careerItem: string;
+  fileLink: string;
+  paymentPref: string;
   name: string;
   email: string;
   country: string;
@@ -23,7 +35,8 @@ type Form = {
 };
 
 const EMPTY: Form = {
-  service: "", subject: "", level: "", deadline: "", details: "", wordCount: "", style: "",
+  service: "", subject: "", level: "", deadline: "", details: "", docType: "", editLevel: "edit", wordCount: "", style: "",
+  turnaround: "d5", addons: [], hours: "1", careerItem: "", fileLink: "", paymentPref: "",
   name: "", email: "", country: "", contactPref: "email", whatsapp: "", website: "", integrityAck: false,
 };
 
@@ -31,8 +44,46 @@ const input =
   "w-full rounded-lg border border-line bg-paper px-3.5 py-3 text-base text-ink placeholder:text-muted/70 focus:border-ink focus:outline-none focus:ring-2 focus:ring-gold";
 const label = "mb-1.5 block text-sm font-medium text-ink";
 const hint = "mt-1 text-xs text-muted";
+const optionCard = "cursor-pointer rounded-xl border p-3.5 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold";
 
-type Result = { status: "received" | "declined"; id: string; route: "call" | "quote" } | null;
+type Result = { status: "received" | "declined"; id: string; route: "call" | "quote"; estimate: number | null } | null;
+
+function Estimate({ f }: { f: Form }) {
+  if (!f.service) return null;
+  const est = estimate({
+    service: f.service,
+    editLevel: f.editLevel,
+    wordCount: f.wordCount ? Number(f.wordCount) : null,
+    turnaround: f.turnaround,
+    addons: f.addons,
+    hours: f.hours ? Number(f.hours) : null,
+    careerItem: f.careerItem,
+  });
+  return (
+    <div className="rounded-xl border border-gold/50 bg-[#fff9e8] p-4" aria-live="polite">
+      <p className="text-xs font-semibold uppercase tracking-widest text-gold-deep">Your estimate</p>
+      {est ? (
+        <>
+          <ul className="mt-2 space-y-1 text-sm text-ink-soft">
+            {est.lines.map((l) => (
+              <li key={l.label} className="flex justify-between gap-4">
+                <span>{l.label}</span>
+                <span className="shrink-0 tabular-nums">{usd(l.amount)}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 flex justify-between border-t border-gold/40 pt-3 font-serif text-xl text-ink">
+            <span>Estimated total</span>
+            <span className="tabular-nums">{usd(est.total)}</span>
+          </p>
+          <p className="mt-2 text-xs text-muted">In US dollars. This is an estimate, not an invoice. We confirm the final price with you before any work starts, and you pay nothing on this form.</p>
+        </>
+      ) : (
+        <p className="mt-1 text-sm text-ink-soft">Fill in the details above and your estimate appears here.</p>
+      )}
+    </div>
+  );
+}
 
 export function RequestForm({ initialService }: { initialService?: string }) {
   const start = serviceById(initialService ?? "")?.id ?? "";
@@ -53,6 +104,14 @@ export function RequestForm({ initialService }: { initialService?: string }) {
   const service = f.service ? serviceById(f.service) : undefined;
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }));
   const today = new Date().toISOString().slice(0, 10);
+  const words = f.wordCount ? Number(f.wordCount) : null;
+  const toggleAddon = (id: string) => set("addons", f.addons.includes(id) ? f.addons.filter((a) => a !== id) : [...f.addons, id]);
+
+  function pickService(id: ServiceId) {
+    // Switching service clears the choices that only made sense for the old one.
+    setF((p) => ({ ...EMPTY, service: id, subject: p.subject, level: p.level, details: p.details }));
+    setError("");
+  }
 
   function goto(n: 1 | 2 | 3) {
     setError("");
@@ -61,6 +120,20 @@ export function RequestForm({ initialService }: { initialService?: string }) {
   }
 
   function checkStep2(): string {
+    if (!service) return "Please choose a service.";
+    if (service.id === "editing") {
+      if (!f.docType) return "Please choose the type of document.";
+      if (!words || words < EDIT_MIN_WORDS) return `Please enter the word count (at least ${EDIT_MIN_WORDS}).`;
+      if (words > EDIT_MAX_WORDS) return "For documents this long, please tell us the length in the details and we will quote you directly.";
+    }
+    if (service.id === "career" && !f.careerItem) return "Please choose what you would like reviewed.";
+    if (service.route === "call") {
+      const h = Number(f.hours);
+      if (!Number.isInteger(h) || h < 1 || h > MAX_HOURS) return `Please choose between 1 and ${MAX_HOURS} hours.`;
+    } else {
+      const p = turnaroundProblem(f.turnaround, words);
+      if (p) return p;
+    }
     if (f.subject.trim().length < 2) return "Please tell us the subject or topic.";
     if (!f.level) return "Please choose your level.";
     if (f.details.trim().length < 30) return "Please give us a little more detail (at least a couple of sentences).";
@@ -72,6 +145,7 @@ export function RequestForm({ initialService }: { initialService?: string }) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) return "Please enter a valid email address.";
     if (!f.country) return "Please choose your country.";
     if (f.contactPref === "whatsapp" && f.whatsapp.replace(/\D/g, "").length < 7) return "Please enter your WhatsApp number with the country code.";
+    if (!f.paymentPref) return "Please choose how you would prefer to pay.";
     if (!f.integrityAck) return "Please confirm that you have read how we work.";
     if (turnstileOn && !token) return "Please complete the security check.";
     return "";
@@ -79,7 +153,7 @@ export function RequestForm({ initialService }: { initialService?: string }) {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const problem = checkStep3();
+    const problem = checkStep2() || checkStep3();
     if (problem) return setError(problem);
     setBusy(true);
     setError("");
@@ -90,6 +164,7 @@ export function RequestForm({ initialService }: { initialService?: string }) {
         body: JSON.stringify({
           ...f,
           wordCount: f.wordCount ? Number(f.wordCount) : null,
+          hours: f.hours ? Number(f.hours) : null,
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           startedAt: startedAt.current,
           turnstileToken: token,
@@ -119,8 +194,13 @@ export function RequestForm({ initialService }: { initialService?: string }) {
         <p className="mt-4 text-lg leading-relaxed text-ink-soft">
           {result.route === "call"
             ? "A person on our team will read your request and get back to you to arrange a short intro call and agree a plan."
-            : "A person on our team will read your request and get back to you with a quote and turnaround time."}
+            : "A person on our team will read your request and get back to you to confirm the price and turnaround."}
         </p>
+        {result.estimate !== null && (
+          <p className="mt-3 text-ink-soft">
+            Your estimate was <strong className="text-ink">{usd(result.estimate)}</strong>. Nothing has been charged. We confirm the final price with you first.
+          </p>
+        )}
         <p className="mt-3 text-ink-soft">Check your inbox for a confirmation. If you do not see it, look in your spam folder.</p>
         <Link href="/" className="mt-8 inline-block rounded-full bg-ink px-6 py-3 font-medium text-cream hover:bg-ink-soft">
           Back to home
@@ -160,6 +240,8 @@ export function RequestForm({ initialService }: { initialService?: string }) {
     );
   }
 
+  const addons = service ? addonsFor(service.id) : [];
+
   return (
     <form onSubmit={submit} noValidate className="rounded-2xl border border-line bg-paper p-5 sm:p-8" aria-label="Request form">
       <div ref={top} className="scroll-mt-24" />
@@ -170,11 +252,7 @@ export function RequestForm({ initialService }: { initialService?: string }) {
           const done = n < step;
           return (
             <li key={s} className="flex flex-1 items-center gap-2" aria-current={on ? "step" : undefined}>
-              <span
-                className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-semibold ${
-                  on ? "bg-ink text-cream" : done ? "bg-gold text-ink" : "bg-sand text-muted"
-                }`}
-              >
+              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-semibold ${on ? "bg-ink text-cream" : done ? "bg-gold text-ink" : "bg-sand text-muted"}`}>
                 {done ? "✓" : n}
               </span>
               <span className={`hidden sm:inline ${on ? "font-semibold text-ink" : "text-muted"}`}>{s}</span>
@@ -191,23 +269,8 @@ export function RequestForm({ initialService }: { initialService?: string }) {
             {SERVICES.map((s) => {
               const on = f.service === s.id;
               return (
-                <label
-                  key={s.id}
-                  className={`cursor-pointer rounded-xl border p-4 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold ${
-                    on ? "border-ink bg-sand" : "border-line hover:border-ink-soft"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="service"
-                    value={s.id}
-                    checked={on}
-                    onChange={() => {
-                      set("service", s.id);
-                      setError("");
-                    }}
-                    className="sr-only"
-                  />
+                <label key={s.id} className={`${optionCard} p-4 ${on ? "border-ink bg-sand" : "border-line hover:border-ink-soft"}`}>
+                  <input type="radio" name="service" value={s.id} checked={on} onChange={() => pickService(s.id)} className="sr-only" />
                   <span className="block font-semibold text-ink">{s.title}</span>
                   <span className="mt-1 block text-sm leading-relaxed text-ink-soft">{s.blurb}</span>
                 </label>
@@ -222,11 +285,94 @@ export function RequestForm({ initialService }: { initialService?: string }) {
       )}
 
       {step === 2 && service && (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div>
             <h2 className="font-serif text-2xl text-ink">{service.title}</h2>
             <p className="mt-1 text-sm text-ink-soft">{service.next}</p>
           </div>
+
+          {service.id === "editing" && (
+            <>
+              <fieldset>
+                <legend className={label}>What would you like us to do?</legend>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {EDIT_LEVELS.map((l) => (
+                    <label key={l.id} className={`${optionCard} ${f.editLevel === l.id ? "border-ink bg-sand" : "border-line hover:border-ink-soft"}`}>
+                      <input type="radio" name="editLevel" checked={f.editLevel === l.id} onChange={() => set("editLevel", l.id)} className="sr-only" />
+                      <span className="block font-semibold text-ink">{l.label}</span>
+                      <span className="mt-0.5 block text-sm text-ink-soft">{l.blurb}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="docType" className={label}>Type of document</label>
+                  <select id="docType" className={input} value={f.docType} onChange={(e) => set("docType", e.target.value)}>
+                    <option value="">Choose one</option>
+                    {DOC_TYPES.map((d) => <option key={d}>{d}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="wordCount" className={label}>Word count</label>
+                  <input id="wordCount" type="number" inputMode="numeric" min={EDIT_MIN_WORDS} max={EDIT_MAX_WORDS} className={`${input} min-w-0`} value={f.wordCount} onChange={(e) => set("wordCount", e.target.value)} placeholder="e.g. 3000" />
+                  <p className={hint}>Of the draft you want edited. Minimum {EDIT_MIN_WORDS}.</p>
+                </div>
+              </div>
+            </>
+          )}
+
+          {service.id === "career" && (
+            <fieldset>
+              <legend className={label}>What would you like reviewed?</legend>
+              <div className="grid gap-3">
+                {CAREER_ITEMS.map((c) => (
+                  <label key={c.id} className={`${optionCard} flex items-center justify-between gap-4 ${f.careerItem === c.id ? "border-ink bg-sand" : "border-line hover:border-ink-soft"}`}>
+                    <input type="radio" name="careerItem" checked={f.careerItem === c.id} onChange={() => set("careerItem", c.id)} className="sr-only" />
+                    <span className="font-medium text-ink">{c.label}</span>
+                    <span className="text-sm tabular-nums text-ink-soft">{usd(c.price)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
+          {service.route === "call" && (
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div>
+                <label htmlFor="hours" className={label}>Hours you would like to book</label>
+                <input id="hours" type="number" inputMode="numeric" min={1} max={MAX_HOURS} className={`${input} min-w-0`} value={f.hours} onChange={(e) => set("hours", e.target.value)} />
+                <p className={hint}>
+                  ${HOURLY[service.id]}/hour. {HOUR_DISCOUNTS.map((d) => `${Math.round(d.off * 100)}% off ${d.minHours}+ hours`).reverse().join(", ")}.
+                </p>
+              </div>
+              <div>
+                <label htmlFor="deadline" className={label}>Want to start by <span className="font-normal text-muted">(optional)</span></label>
+                <input id="deadline" type="date" min={today} className={`${input} min-w-0`} value={f.deadline} onChange={(e) => set("deadline", e.target.value)} />
+                <p className={hint}>Leave blank if you are flexible.</p>
+              </div>
+            </div>
+          )}
+
+          {(service.id === "editing" || service.id === "career") && (
+            <fieldset>
+              <legend className={label}>How soon do you need it back?</legend>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {TURNAROUNDS.map((t) => {
+                  const blocked = service.id === "editing" && words !== null && words > t.maxWords;
+                  return (
+                    <label key={t.id} className={`${optionCard} flex items-center justify-between gap-3 ${blocked ? "cursor-not-allowed opacity-45" : ""} ${f.turnaround === t.id ? "border-ink bg-sand" : "border-line hover:border-ink-soft"}`}>
+                      <input type="radio" name="turnaround" disabled={blocked} checked={f.turnaround === t.id} onChange={() => set("turnaround", t.id)} className="sr-only" />
+                      <span className="text-sm font-medium text-ink">{t.label}</span>
+                      <span className="text-xs text-muted">{t.surcharge > 0 ? `+${Math.round(t.surcharge * 100)}%` : "standard"}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {service.id === "editing" && <p className={hint}>Shorter turnarounds are only offered for shorter documents.</p>}
+            </fieldset>
+          )}
+
           <div className="grid gap-5 sm:grid-cols-2">
             <div>
               <label htmlFor="subject" className={label}>Subject or topic</label>
@@ -240,19 +386,7 @@ export function RequestForm({ initialService }: { initialService?: string }) {
               </select>
             </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div>
-              <label htmlFor="deadline" className={label}>{service.route === "call" ? "Want to start by" : "Deadline"} <span className="font-normal text-muted">(optional)</span></label>
-              <input id="deadline" type="date" min={today} className={`${input} min-w-0`} value={f.deadline} onChange={(e) => set("deadline", e.target.value)} />
-              <p className={hint}>Leave blank if you are flexible.</p>
-            </div>
-            {service.id === "editing" && (
-              <div>
-                <label htmlFor="wordCount" className={label}>Approximate word count <span className="font-normal text-muted">(optional)</span></label>
-                <input id="wordCount" type="number" inputMode="numeric" min={1} className={`${input} min-w-0`} value={f.wordCount} onChange={(e) => set("wordCount", e.target.value)} placeholder="e.g. 3000" />
-              </div>
-            )}
-          </div>
+
           {(service.id === "editing" || service.id === "coaching") && (
             <div>
               <label htmlFor="style" className={label}>Referencing style <span className="font-normal text-muted">(optional)</span></label>
@@ -262,11 +396,40 @@ export function RequestForm({ initialService }: { initialService?: string }) {
               </select>
             </div>
           )}
+
           <div>
             <label htmlFor="details" className={label}>Tell us more</label>
-            <textarea id="details" rows={6} className={input} value={f.details} onChange={(e) => set("details", e.target.value)} placeholder={service.detailsPrompt} maxLength={3000} />
-            <p className={hint}>{f.details.trim().length}/3000. Please do not paste personal documents here; we will arrange sharing safely.</p>
+            <textarea id="details" rows={5} className={input} value={f.details} onChange={(e) => set("details", e.target.value)} placeholder={service.detailsPrompt} maxLength={3000} />
+            <p className={hint}>{f.details.trim().length}/3000. Please do not paste the full document or personal details here.</p>
           </div>
+
+          {(service.id === "editing" || service.id === "career") && (
+            <div>
+              <label htmlFor="fileLink" className={label}>Link to your document <span className="font-normal text-muted">(optional)</span></label>
+              <input id="fileLink" type="url" inputMode="url" className={input} value={f.fileLink} onChange={(e) => set("fileLink", e.target.value)} placeholder="https://drive.google.com/..." maxLength={600} />
+              <p className={hint}>Google Drive, Dropbox, OneDrive, Box, iCloud or WeTransfer. Make sure anyone with the link can view it. You can also send it later.</p>
+            </div>
+          )}
+
+          {addons.length > 0 && (
+            <fieldset>
+              <legend className={label}>Extras <span className="font-normal text-muted">(optional)</span></legend>
+              <div className="grid gap-2">
+                {addons.map((a) => (
+                  <label key={a.id} className={`${optionCard} flex items-start gap-3 ${f.addons.includes(a.id) ? "border-ink bg-sand" : "border-line hover:border-ink-soft"}`}>
+                    <input type="checkbox" checked={f.addons.includes(a.id)} onChange={() => toggleAddon(a.id)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#14284b]" />
+                    <span className="flex-1">
+                      <span className="block text-sm font-medium text-ink">{a.label}</span>
+                      <span className="block text-xs text-ink-soft">{a.blurb}</span>
+                    </span>
+                    <span className="text-sm tabular-nums text-ink-soft">{usd(a.price)}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+
+          <Estimate f={f} />
         </div>
       )}
 
@@ -305,16 +468,26 @@ export function RequestForm({ initialService }: { initialService?: string }) {
               <p className={hint}>Include the country code.</p>
             </div>
           )}
+          <div>
+            <label htmlFor="payment" className={label}>How would you prefer to pay?</label>
+            <select id="payment" className={input} value={f.paymentPref} onChange={(e) => set("paymentPref", e.target.value)}>
+              <option value="">Choose one</option>
+              {PAYMENT_METHODS.map((p) => <option key={p}>{p}</option>)}
+            </select>
+            <p className={hint}>Nothing is charged here. We send an invoice or payment link once we have agreed the price. We never ask for card details or passwords on this form.</p>
+          </div>
 
           {/* Honeypot: invisible to people, tempting to bots. */}
           <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
             <label>Website<input tabIndex={-1} autoComplete="off" value={f.website} onChange={(e) => set("website", e.target.value)} /></label>
           </div>
 
+          <Estimate f={f} />
+
           <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-sand p-4 text-sm leading-relaxed text-ink-soft">
             <input type="checkbox" checked={f.integrityAck} onChange={(e) => set("integrityAck", e.target.checked)} className="mt-1 h-5 w-5 shrink-0 accent-[#14284b]" />
             <span>
-              I understand Trivium Tutors helps me learn and improve my <strong>own</strong> work. It does not sit exams, attend classes for me, or write work for me to submit as mine.{" "}
+              I understand Trivium Tutors helps me learn and improve my <strong>own</strong> work. It does not sit exams, attend classes for me, or write work for me to submit as mine. Any document I send is a draft I wrote myself.{" "}
               <Link href="/integrity" target="_blank" className="underline hover:text-ink">How we work</Link>
             </span>
           </label>

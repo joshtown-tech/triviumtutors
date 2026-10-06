@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { serviceById } from "@/lib/services";
+import { CAREER_ITEMS, EDIT_LEVELS, TURNAROUNDS, ADDONS, usd } from "@/lib/pricing";
 import type { RequestInput } from "@/lib/request";
 import type { Screening } from "@/lib/screening";
 
@@ -55,10 +56,19 @@ function lines(l: Lead): [string, string][] {
     ["Service", `${service?.title ?? input.service} (${service?.route === "call" ? "call first" : "quote"})`],
     ["Subject", input.subject],
     ["Level", input.level],
-    ["Deadline", input.deadline || "Flexible"],
   ];
+  if (input.docType) rows.push(["Document", input.docType]);
+  if (input.editLevel) rows.push(["Work", EDIT_LEVELS.find((e) => e.id === input.editLevel)?.label ?? input.editLevel]);
+  if (input.careerItem) rows.push(["Review of", CAREER_ITEMS.find((c) => c.id === input.careerItem)?.label ?? input.careerItem]);
   if (input.wordCount) rows.push(["Word count", input.wordCount.toLocaleString("en")]);
+  if (input.hours) rows.push(["Hours", String(input.hours)]);
   if (input.style) rows.push(["Referencing style", input.style]);
+  if (input.turnaround) rows.push(["Turnaround", TURNAROUNDS.find((t) => t.id === input.turnaround)?.label ?? input.turnaround]);
+  if (input.deadline) rows.push(["Start by", input.deadline]);
+  if (input.addons.length) rows.push(["Add-ons", input.addons.map((a) => ADDONS.find((x) => x.id === a)?.label ?? a).join(", ")]);
+  if (input.estimate) rows.push(["Estimate", `${usd(input.estimate.total)} (${input.estimate.lines.map((l) => `${l.label}: ${usd(l.amount)}`).join("; ")})`]);
+  if (input.fileLink) rows.push(["Document link", input.fileLink]);
+  rows.push(["Prefers to pay by", input.paymentPref]);
   rows.push(
     ["Name", input.name],
     ["Email", input.email],

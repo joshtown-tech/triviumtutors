@@ -20,6 +20,12 @@ Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, OpenAI, Supab
 
 Services live in one file, src/lib/services.ts.
 
+## Pricing
+
+All prices live in `src/lib/pricing.ts`: per-word editing rates, turnaround surcharges, add-ons, CV review prices, hourly rates and block discounts. The form shows a live estimate, and the server recomputes it from the submitted fields (the browser's number is ignored). **The numbers in that file are placeholder defaults, not researched prices. Set them before the domain goes live.** Prices are in USD. Nothing is charged on the form: the team confirms the price and sends an invoice or payment link, and the customer's preferred method (card link, PayPal, bank transfer, Wise) is only a preference.
+
+Documents are shared by link (Google Drive, Dropbox, OneDrive, Box, iCloud, WeTransfer only, so the team never opens an unknown site). Direct upload is not built yet; it needs the Supabase storage bucket first.
+
 ## Scope decision
 
 The site offers tutoring, editing of the customer's own writing, coaching, research guidance and CV review. It deliberately does not offer exam taking, attending classes as the student, or writing assessed work for submission. That is contract cheating: illegal to provide or advertise in Australia, banned by most universities, and a reason payment and ad platforms close accounts. The screening step enforces it on incoming requests.

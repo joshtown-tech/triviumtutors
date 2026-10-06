@@ -3,7 +3,7 @@ import { SERVICES } from "@/lib/services";
 
 const STEPS = [
   { n: "1", title: "Tell us what you need", body: "Pick a service and answer a few quick questions. It takes about two minutes." },
-  { n: "2", title: "A person replies", body: "We read every request ourselves. Tutoring and coaching start with a short intro call. Editing and reviews get a clear quote." },
+  { n: "2", title: "A person replies", body: "We read every request ourselves. Tutoring and coaching start with a short intro call. Editing and reviews show a live price estimate, confirmed by us before any work starts." },
   { n: "3", title: "Work together", body: "You agree the price and plan before anything starts. Sessions and feedback fit around your timezone." },
 ];
 
@@ -15,7 +15,7 @@ const ARTS = [
 
 const FAQ = [
   { q: "Where are you based, and who do you work with?", a: "We work online with students and professionals in the United States, Canada, the United Kingdom, Europe, Australia, New Zealand and Latin America. Sessions are scheduled around your timezone." },
-  { q: "How much does it cost?", a: "It depends on the service. Tutoring is agreed on your intro call. Editing and application reviews are quoted from what you send us. You always know the price before any work starts." },
+  { q: "How much does it cost?", a: "It depends on the service. Tutoring is agreed on your intro call. Editing and application reviews show a live estimate in the form, based on word count and turnaround. We confirm the final price with you before any work starts, and nothing is charged on the form." },
   { q: "Will you write my essay or sit my exam?", a: "No. That is academic misconduct, and it can cost you your place or degree. We help you understand the material, plan and write it yourself, and improve your own draft." },
   { q: "What happens to the documents I share?", a: "We only ask for them once we have agreed to work together, and only use them for your project. See our privacy page for details." },
   { q: "How fast will I hear back?", a: "A person reads every request and replies within one business day." },

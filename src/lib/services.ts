@@ -34,7 +34,7 @@ export const SERVICES: Service[] = [
     title: "Editing and proofreading",
     blurb: "Feedback and corrections on a draft you wrote: grammar, clarity, structure and referencing.",
     route: "quote",
-    next: "We will review your description and reply with a quote and turnaround.",
+    next: "You get a live price estimate as you go. We confirm the final price with you before any work starts.",
     detailsPrompt: "Tell us about the document and what kind of help you want. Please do not paste the full text here.",
   },
   {
@@ -58,7 +58,7 @@ export const SERVICES: Service[] = [
     title: "CV and application review",
     blurb: "Review and coaching on your CV, personal statement or cover letter, so it is clearly yours and stronger.",
     route: "quote",
-    next: "We will review your description and reply with a quote and turnaround.",
+    next: "You get a live price estimate as you go. We confirm the final price with you before any work starts.",
     detailsPrompt: "What are you applying for, and what do you want reviewed?",
   },
 ];

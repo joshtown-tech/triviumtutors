@@ -14,7 +14,7 @@ import { saveRequest } from "@/lib/store";
 
 export const runtime = "nodejs";
 
-const RECEIVED = (id: string, route: "call" | "quote") => NextResponse.json({ status: "received", id, route });
+const RECEIVED = (id: string, route: "call" | "quote", estimate?: number | null) => NextResponse.json({ status: "received", id, route, estimate: estimate ?? null });
 
 export async function POST(req: Request) {
   const length = Number(req.headers.get("content-length") ?? 0);
@@ -67,5 +67,5 @@ export async function POST(req: Request) {
 
   // The receipt is a courtesy and also quietly proves the email address works.
   await sendReceipt({ id, input, screening });
-  return RECEIVED(id, route);
+  return RECEIVED(id, route, input.estimate?.total);
 }
