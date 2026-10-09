@@ -170,7 +170,7 @@ export function parseRequest(body: unknown): { ok: true; input: RequestInput; me
       docType,
       editLevel,
       wordCount,
-      style: service.id === "editing" || service.id === "coaching" ? style : "",
+      style: service.id === "editing" || service.id === "coaching" || service.id === "assignment" ? style : "",
       turnaround,
       addons,
       hours,

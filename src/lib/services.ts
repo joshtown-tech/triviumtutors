@@ -5,7 +5,7 @@
 // Deliberately NOT here: sitting exams, attending classes as the student, or
 // writing work the student will submit as their own. See /integrity.
 
-export type ServiceId = "tutoring" | "editing" | "coaching" | "research" | "career";
+export type ServiceId = "tutoring" | "assignment" | "editing" | "coaching" | "research" | "career";
 
 /** "call" requests are scheduled as a conversation, "quote" requests are priced from the material. */
 export type Route = "call" | "quote";
@@ -28,6 +28,14 @@ export const SERVICES: Service[] = [
     route: "call",
     next: "We will suggest a short intro call to agree the plan and schedule.",
     detailsPrompt: "What do you want to get better at, and what is coming up (exam, module, deadline)?",
+  },
+  {
+    id: "assignment",
+    title: "Assignment help",
+    blurb: "Make sense of your brief. We break down what is asked, plan your approach and point you to sources, and you write it.",
+    route: "call",
+    next: "We will suggest a short session to walk through your assignment together.",
+    detailsPrompt: "What is the assignment, when is it due, and which part is confusing? Share the brief by link if you can.",
   },
   {
     id: "editing",

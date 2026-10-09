@@ -387,7 +387,7 @@ export function RequestForm({ initialService, initialWords }: { initialService?:
             </div>
           </div>
 
-          {(service.id === "editing" || service.id === "coaching") && (
+          {(service.id === "editing" || service.id === "coaching" || service.id === "assignment") && (
             <div>
               <label htmlFor="style" className={label}>Referencing style <span className="font-normal text-muted">(optional)</span></label>
               <select id="style" className={input} value={f.style} onChange={(e) => set("style", e.target.value)}>
@@ -403,9 +403,9 @@ export function RequestForm({ initialService, initialWords }: { initialService?:
             <p className={hint}>{f.details.trim().length}/3000. Please do not paste the full document or personal details here.</p>
           </div>
 
-          {(service.id === "editing" || service.id === "career") && (
+          {(service.id === "editing" || service.id === "career" || service.id === "assignment") && (
             <div>
-              <label htmlFor="fileLink" className={label}>Link to your document <span className="font-normal text-muted">(optional)</span></label>
+              <label htmlFor="fileLink" className={label}>{service.id === "assignment" ? "Link to the assignment brief" : "Link to your document"} <span className="font-normal text-muted">(optional)</span></label>
               <input id="fileLink" type="url" inputMode="url" className={input} value={f.fileLink} onChange={(e) => set("fileLink", e.target.value)} placeholder="https://drive.google.com/..." maxLength={600} />
               <p className={hint}>Google Drive, Dropbox, OneDrive, Box, iCloud or WeTransfer. Make sure anyone with the link can view it. You can also send it later.</p>
             </div>

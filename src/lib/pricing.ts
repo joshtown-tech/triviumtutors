@@ -49,7 +49,7 @@ export const CAREER_ITEMS = [
 export type CareerItemId = (typeof CAREER_ITEMS)[number]["id"];
 
 /** Hourly work. Bigger blocks get a small discount. */
-export const HOURLY: Partial<Record<ServiceId, number>> = { tutoring: 45, coaching: 50, research: 55 };
+export const HOURLY: Partial<Record<ServiceId, number>> = { tutoring: 45, assignment: 50, coaching: 50, research: 55 };
 export const HOUR_DISCOUNTS = [
   { minHours: 10, off: 0.1 },
   { minHours: 5, off: 0.05 },

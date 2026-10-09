@@ -17,6 +17,7 @@ export default function Integrity() {
       <h2>What we do</h2>
       <ul>
         <li>One-to-one tutoring to help you understand a subject and prepare for assessments you sit yourself.</li>
+        <li>Assignment help: making sense of your brief, breaking down what is asked, planning your approach and finding sources, so you can write it yourself.</li>
         <li>Writing coaching: planning, structuring and arguing, with feedback on your drafts.</li>
         <li>Editing and proofreading of work you wrote: grammar, clarity, flow and referencing.</li>
         <li>Research guidance: finding sources, choosing methods, organising a literature review.</li>
@@ -27,7 +28,7 @@ export default function Integrity() {
       <ul>
         <li>Sit or take an exam, test or quiz for you.</li>
         <li>Attend, log in to, or complete an online class or course as you.</li>
-        <li>Write an essay, assignment, thesis or other assessed work for you to submit as your own.</li>
+        <li>Write or solve an essay, assignment, problem set, thesis or other assessed work for you to submit as your own.</li>
         <li>Help work get past plagiarism or AI-detection tools.</li>
       </ul>
 
