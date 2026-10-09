@@ -1,10 +1,20 @@
 import Link from "next/link";
 import { SERVICES } from "@/lib/services";
+import { FAQ } from "@/lib/faq";
+import { Team } from "@/components/Team";
+import { Reviews } from "@/components/Reviews";
 
 const STEPS = [
   { n: "1", title: "Tell us what you need", body: "Pick a service and answer a few quick questions. It takes about two minutes." },
   { n: "2", title: "A person replies", body: "We read every request ourselves. Tutoring and coaching start with a short intro call. Editing and reviews show a live price estimate, confirmed by us before any work starts." },
   { n: "3", title: "Work together", body: "You agree the price and plan before anything starts. Sessions and feedback fit around your timezone." },
+];
+
+const TRUST = [
+  { title: "A person reads every request", body: "A real person reads and replies, within one business day." },
+  { title: "Your work stays yours", body: "We teach, coach and edit. We never write it for you." },
+  { title: "Price confirmed first", body: "See a live estimate, and agree the final price before any work starts." },
+  { title: "Fits your timezone", body: "Online sessions for the US, UK, Europe, Australia and Latin America." },
 ];
 
 const ARTS = [
@@ -13,17 +23,19 @@ const ARTS = [
   { name: "Rhetoric", line: "Make it land. Writing that persuades." },
 ];
 
-const FAQ = [
-  { q: "Where are you based, and who do you work with?", a: "We work online with students and professionals in the United States, Canada, the United Kingdom, Europe, Australia, New Zealand and Latin America. Sessions are scheduled around your timezone." },
-  { q: "How much does it cost?", a: "It depends on the service. Tutoring is agreed on your intro call. Editing and application reviews show a live estimate in the form, based on word count and turnaround. We confirm the final price with you before any work starts, and nothing is charged on the form." },
-  { q: "Will you write my essay or sit my exam?", a: "No. That is academic misconduct, and it can cost you your place or degree. We help you understand the material, plan and write it yourself, and improve your own draft." },
-  { q: "What happens to the documents I share?", a: "We only ask for them once we have agreed to work together, and only use them for your project. See our privacy page for details." },
-  { q: "How fast will I hear back?", a: "A person reads every request and replies within one business day." },
-];
-
 export default function Home() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       <section className="relative overflow-hidden">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 sm:px-6 md:grid-cols-[1.2fr_1fr] md:py-24">
           <div>
@@ -67,6 +79,20 @@ export default function Home() {
         </div>
       </section>
 
+      <section aria-label="Why students choose us" className="border-y border-line bg-paper">
+        <ul className="mx-auto grid max-w-6xl gap-6 px-4 py-8 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
+          {TRUST.map((t) => (
+            <li key={t.title} className="flex gap-3">
+              <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-gold text-xs font-bold text-ink" aria-hidden="true">✓</span>
+              <span>
+                <span className="block font-semibold text-ink">{t.title}</span>
+                <span className="block text-sm leading-relaxed text-ink-soft">{t.body}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
       <section id="services" className="scroll-mt-20 bg-sand/60 py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <h2 className="text-4xl text-ink">What we help with</h2>
@@ -99,6 +125,9 @@ export default function Home() {
           ))}
         </ol>
       </section>
+
+      <Team />
+      <Reviews />
 
       <section className="bg-ink py-16 text-cream sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 md:grid-cols-[1fr_1.2fr] md:items-center">

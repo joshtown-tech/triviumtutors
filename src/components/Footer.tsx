@@ -20,6 +20,7 @@ export function Footer() {
             <li><Link href="/#how" className="hover:text-gold">How it works</Link></li>
             <li><Link href="/integrity" className="hover:text-gold">Our approach</Link></li>
             <li><Link href="/request" className="hover:text-gold">Make a request</Link></li>
+            <li><Link href="/tools/word-counter" className="hover:text-gold">Free word counter</Link></li>
           </ul>
         </div>
         <div>

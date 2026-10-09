@@ -65,7 +65,7 @@ export const SERVICES: Service[] = [
 
 export const LEVELS = ["High school", "Undergraduate", "Postgraduate", "Professional or other"] as const;
 
-export const STYLES = ["APA", "MLA", "Harvard", "Chicago", "Vancouver", "IEEE", "Other or not sure"] as const;
+export const STYLES = ["APA", "MLA", "Harvard", "Chicago", "Turabian", "Vancouver", "IEEE", "Oxford", "AMA", "ASA", "Other or not sure"] as const;
 
 export const CONTACT_PREFS = ["email", "whatsapp"] as const;
 export type ContactPref = (typeof CONTACT_PREFS)[number];

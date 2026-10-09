@@ -85,9 +85,9 @@ function Estimate({ f }: { f: Form }) {
   );
 }
 
-export function RequestForm({ initialService }: { initialService?: string }) {
+export function RequestForm({ initialService, initialWords }: { initialService?: string; initialWords?: string }) {
   const start = serviceById(initialService ?? "")?.id ?? "";
-  const [f, setF] = useState<Form>({ ...EMPTY, service: start });
+  const [f, setF] = useState<Form>({ ...EMPTY, service: start, wordCount: start === "editing" && initialWords ? initialWords : "" });
   const [step, setStep] = useState<1 | 2 | 3>(start ? 2 : 1);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
