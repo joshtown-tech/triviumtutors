@@ -21,6 +21,7 @@ export const metadata: Metadata = {
     siteName: "Trivium Tutors",
     type: "website",
   },
+  alternates: { canonical: "./" },
   robots: { index: true, follow: true },
 };
 
