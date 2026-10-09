@@ -123,6 +123,15 @@ export function estimate(b: Basis): Estimate | null {
   return { lines, total: money(lines.reduce((s, l) => s + l.amount, 0)) };
 }
 
+/** A short "from" price for a service card, always read from the same numbers the estimate uses. */
+export function priceHint(service: ServiceId): string {
+  const rate = HOURLY[service];
+  if (rate) return `${usd(rate)} per hour`;
+  if (service === "editing") return `From ${usd(EDIT_MINIMUM)}, priced by word count`;
+  if (service === "career") return `From ${usd(Math.min(...CAREER_ITEMS.map((c) => c.price)))}`;
+  return "";
+}
+
 export function usd(n: number): string {
   const abs = Math.abs(n);
   const text = `$${abs.toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(abs) ? 0 : 2, maximumFractionDigits: 2 })}`;

@@ -20,6 +20,18 @@ Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, Anthropic Cla
 
 Services live in one file, src/lib/services.ts.
 
+## Accounts (sign up and sign in)
+
+Customers sign up with email and password on Supabase Auth, through our own routes (`src/app/api/auth/[action]/route.ts`); the browser never talks to Supabase. `src/proxy.ts` sends signed-out visitors from `/request` to `/signup` and back. The request's email always comes from the verified account, not the form. Session cookies are HttpOnly. Signup has Turnstile, a honeypot, a too-fast check and rate limits.
+
+**It is OFF until `SUPABASE_ANON_KEY` is set**, so the site works without accounts until then. Use the project's `anon` `public` key, never the `service_role` key.
+
+To make it work for real customers, in the Supabase dashboard:
+1. Authentication, URL Configuration: Site URL `https://triviumtutors.com`; add Redirect URLs `https://triviumtutors.com/auth/callback` and `https://www.triviumtutors.com/auth/callback`.
+2. Authentication, SMTP: turn on custom SMTP (Resend: host `smtp.resend.com`, port 465, user `resend`, password = the Resend API key, sender on the verified domain). Supabase's built-in email only reaches your own team members and is heavily rate limited, so without this customers never receive the confirmation email.
+3. Authentication, Attack Protection: turn on Turnstile captcha too if you can (then pass the token to Supabase as well), because the public anon key lets anyone call Supabase signup directly.
+4. Optionally edit the email templates so the wording matches the brand.
+
 ## Pricing
 
 All prices live in `src/lib/pricing.ts`: per-word editing rates, turnaround surcharges, add-ons, CV review prices, hourly rates and block discounts. The form shows a live estimate, and the server recomputes it from the submitted fields (the browser's number is ignored). **The numbers in that file are placeholder defaults, not researched prices. Set them before the domain goes live.** Prices are in USD. Nothing is charged on the form: the team confirms the price and sends an invoice or payment link, and the customer's preferred method (card link, PayPal, bank transfer, Wise) is only a preference.

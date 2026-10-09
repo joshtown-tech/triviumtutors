@@ -6,6 +6,7 @@ import { screenRequest } from "@/lib/screening";
 import { notifyTeam, sendReceipt } from "@/lib/notify";
 import { serviceById } from "@/lib/services";
 import { saveRequest } from "@/lib/store";
+import { authEnabled, currentUser } from "@/lib/supabaseAuth";
 
 // POST /api/request: the whole intake pipeline in one place.
 //   parse -> bot checks -> rate limit -> Turnstile -> screen -> notify
@@ -27,7 +28,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Something went wrong with that request. Please try again." }, { status: 400 });
   }
 
-  const parsed = parseRequest(body);
+  // Once accounts are on, only signed-in customers can send a request, and the
+  // email on it is always the one on their verified account, whatever the form said.
+  const user = authEnabled ? await currentUser() : null;
+  if (authEnabled && !user) return NextResponse.json({ error: "Please sign in to send a request.", code: "auth" }, { status: 401 });
+
+  const parsed = parseRequest(user?.email ? { ...(body as object), email: user.email } : body);
   if (!parsed.ok) return NextResponse.json({ error: parsed.error }, { status: 400 });
   const { input, meta } = parsed;
   const route = serviceById(input.service)?.route ?? "quote";

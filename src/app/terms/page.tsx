@@ -20,6 +20,9 @@ export default function Terms() {
       <h2>Your work</h2>
       <p>Your documents and ideas remain yours. You are responsible for how you use our feedback and for following your institution&apos;s rules about acceptable help. Editing and feedback are suggestions; the decisions and the final submission are yours.</p>
 
+      <h2>Your account</h2>
+      <p>You need a free account to send a request. Give us accurate details, keep your password to yourself, and tell us if you think someone else has used your account. One account is for one person. We may close an account that is used to send spam or to ask for work we do not do.</p>
+
       <h2>Requests and pricing</h2>
       <p>Sending a request is not a contract. A booking is confirmed when we agree scope, price and timing with you in writing. We will tell you the price before any work starts.</p>
 

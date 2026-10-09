@@ -1,13 +1,21 @@
 import Link from "next/link";
 import { SERVICES } from "@/lib/services";
+import { priceHint } from "@/lib/pricing";
 import { FAQ } from "@/lib/faq";
 import { Team } from "@/components/Team";
 import { Reviews } from "@/components/Reviews";
 
 const STEPS = [
-  { n: "1", title: "Tell us what you need", body: "Pick a service and answer a few quick questions. It takes about two minutes." },
-  { n: "2", title: "A person replies", body: "We read every request ourselves. Tutoring and coaching start with a short intro call. Editing and reviews show a live price estimate, confirmed by us before any work starts." },
-  { n: "3", title: "Work together", body: "You agree the price and plan before anything starts. Sessions and feedback fit around your timezone." },
+  { n: "1", title: "Create a free account", body: "Sign up with your email. It keeps requests genuine and gives us a verified address to reply to." },
+  { n: "2", title: "Tell us what you need", body: "Pick a service and answer a few quick questions. Editing and reviews show a live price estimate as you go." },
+  { n: "3", title: "A person replies", body: "We read every request ourselves, within one business day. Tutoring and coaching start with a short intro call." },
+  { n: "4", title: "Work together", body: "You agree the price and plan before anything starts. Sessions and feedback fit around your timezone." },
+];
+
+const AUDIENCES = [
+  { title: "University students", body: "Stuck on a topic, an assignment brief or a draft? Get it explained, planned and improved, while the work stays yours." },
+  { title: "Studying abroad", body: "Learning how a new university expects you to write and reference. We help you get the conventions right in your own words." },
+  { title: "Applicants and professionals", body: "CVs, personal statements, reports and journal manuscripts, reviewed so they read clearly and sound like you." },
 ];
 
 const TRUST = [
@@ -54,7 +62,7 @@ export default function Home() {
                 See services
               </Link>
             </div>
-            <p className="mt-5 text-sm text-muted">A person replies within one business day.</p>
+            <p className="mt-5 text-sm text-muted">Free account. A person replies within one business day.</p>
           </div>
 
           <div className="rounded-3xl bg-ink p-8 text-cream" aria-label="The three arts of the trivium">
@@ -106,16 +114,31 @@ export default function Home() {
               >
                 <h3 className="text-2xl text-ink">{s.title}</h3>
                 <p className="mt-2 flex-1 leading-relaxed text-ink-soft">{s.blurb}</p>
-                <span className="mt-5 text-sm font-semibold text-ink group-hover:text-gold-deep">Request this →</span>
+                <p className="mt-4 text-sm font-medium text-gold-deep">{priceHint(s.id)}</p>
+                <span className="mt-2 text-sm font-semibold text-ink group-hover:text-gold-deep">Request this →</span>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="how" className="scroll-mt-20 mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+      <section className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20" aria-labelledby="who-h">
+        <h2 id="who-h" className="text-4xl text-ink">Who we help</h2>
+        <p className="mt-3 max-w-2xl text-lg text-ink-soft">Students and professionals in the United States, Canada, the United Kingdom, Europe, Australia, New Zealand and Latin America.</p>
+        <ul className="mt-10 grid gap-5 md:grid-cols-3">
+          {AUDIENCES.map((a) => (
+            <li key={a.title} className="rounded-2xl border border-line bg-paper p-6">
+              <h3 className="text-2xl text-ink">{a.title}</h3>
+              <p className="mt-2 leading-relaxed text-ink-soft">{a.body}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section id="how" className="scroll-mt-20 bg-sand/60 py-16 sm:py-20">
+       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <h2 className="text-4xl text-ink">How it works</h2>
-        <ol className="mt-10 grid gap-8 md:grid-cols-3">
+        <ol className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s) => (
             <li key={s.n}>
               <span className="grid h-11 w-11 place-items-center rounded-full bg-ink font-serif text-xl text-gold">{s.n}</span>
@@ -124,6 +147,7 @@ export default function Home() {
             </li>
           ))}
         </ol>
+       </div>
       </section>
 
       <Team />
@@ -158,7 +182,7 @@ export default function Home() {
         </div>
         <div className="mt-12 rounded-2xl bg-sand p-8 text-center">
           <h2 className="text-3xl text-ink">Ready when you are.</h2>
-          <p className="mt-2 text-ink-soft">Tell us what you need. It takes about two minutes.</p>
+          <p className="mt-2 text-ink-soft">Create a free account, then tell us what you need. It takes a few minutes.</p>
           <Link href="/request" className="mt-5 inline-block rounded-full bg-ink px-7 py-3.5 font-medium text-cream hover:bg-ink-soft">
             Make a request
           </Link>

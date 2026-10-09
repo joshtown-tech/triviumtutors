@@ -85,9 +85,9 @@ function Estimate({ f }: { f: Form }) {
   );
 }
 
-export function RequestForm({ initialService, initialWords }: { initialService?: string; initialWords?: string }) {
+export function RequestForm({ initialService, initialWords, account }: { initialService?: string; initialWords?: string; account?: { name: string; email: string } }) {
   const start = serviceById(initialService ?? "")?.id ?? "";
-  const [f, setF] = useState<Form>({ ...EMPTY, service: start, wordCount: start === "editing" && initialWords ? initialWords : "" });
+  const [f, setF] = useState<Form>({ ...EMPTY, service: start, wordCount: start === "editing" && initialWords ? initialWords : "", name: account?.name ?? "", email: account?.email ?? "" });
   const [step, setStep] = useState<1 | 2 | 3>(start ? 2 : 1);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -171,6 +171,7 @@ export function RequestForm({ initialService, initialWords }: { initialService?:
         }),
       });
       const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { window.location.href = "/login?next=/request"; return; }
       if (!res.ok) {
         setError(data.error || "Something went wrong. Please try again.");
         setToken("");
@@ -443,7 +444,8 @@ export function RequestForm({ initialService, initialWords }: { initialService?:
             </div>
             <div>
               <label htmlFor="email" className={label}>Email</label>
-              <input id="email" type="email" autoComplete="email" className={input} value={f.email} onChange={(e) => set("email", e.target.value)} maxLength={254} />
+              <input id="email" type="email" autoComplete="email" className={`${input} ${account ? "bg-sand text-ink-soft" : ""}`} value={f.email} onChange={(e) => set("email", e.target.value)} maxLength={254} readOnly={Boolean(account)} />
+              {account && <p className={hint}>From your account. We reply here.</p>}
             </div>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">

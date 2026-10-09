@@ -12,6 +12,7 @@ export default function Privacy() {
 
       <h2>What we collect</h2>
       <ul>
+        <li>Your account details if you sign up: name, email address, and a password that Supabase stores only in hashed form. We never see your password.</li>
         <li>What you put in the request form: your name, email, country, timezone, optional WhatsApp number, and the details you write about what you need.</li>
         <li>Basic technical information needed to keep the form safe, such as your IP address, used for spam protection and rate limiting.</li>
       </ul>
@@ -30,7 +31,7 @@ export default function Privacy() {
         <li>Anthropic, which receives the text of your request so an automated check can tell whether it is genuine and something we offer. We do not use it to profile you or for marketing.</li>
         <li>Resend, which delivers our emails.</li>
         <li>Slack, where our team is notified of new requests.</li>
-        <li>Supabase, the database where we keep a copy of each request.</li>
+        <li>Supabase, which runs customer accounts and the database where we keep a copy of each request.</li>
         <li>Our website hosting provider.</li>
       </ul>
       <p>Some of these providers are based outside your country, including in the United States. Where required, transfers rely on the safeguards those providers offer, such as standard contractual clauses.</p>
@@ -45,7 +46,7 @@ export default function Privacy() {
       <p>Depending on where you live (for example under the UK and EU GDPR, the Australian Privacy Act, or California law), you can ask to see, correct, delete or export your information, object to how we use it, or complain to your local data protection authority. Email <a href={`mailto:${CONTACT}`}>{CONTACT}</a> and we will respond within 30 days.</p>
 
       <h2>Cookies</h2>
-      <p>We do not use advertising or analytics cookies. The Cloudflare security check may set what it needs to work.</p>
+      <p>We do not use advertising or analytics cookies. If you sign in, we set a cookie that keeps you signed in. The Cloudflare security check may set what it needs to work.</p>
 
       <h2>Contact</h2>
       <p><a href={`mailto:${CONTACT}`}>{CONTACT}</a></p>
