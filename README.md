@@ -2,7 +2,7 @@
 
 Request-intake website for triviumtutors.com. A visitor picks a service, answers a few questions, and the team is notified by email and/or Slack. Spam and out-of-scope requests are filtered before anyone is bothered.
 
-Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, OpenAI, Supabase. Email and Slack tell the team; Supabase keeps a backup copy of every request.
+Next.js 16 (App Router), Tailwind 4, Resend, Cloudflare Turnstile, Anthropic Claude, Supabase. Email and Slack tell the team; Supabase keeps a backup copy of every request.
 
 ## How a request flows
 
@@ -37,7 +37,7 @@ The site offers tutoring, editing of the customer's own writing, coaching, resea
    - Resend: verify triviumtutors.com in Resend, set `RESEND_API_KEY`, `MAIL_FROM`, `NOTIFY_EMAIL`
    - Slack: create an incoming webhook, set `SLACK_WEBHOOK_URL`
    - Turnstile: create a widget in Cloudflare, set both keys
-   - OpenAI: set `OPENAI_API_KEY`
+   - Anthropic: set `ANTHROPIC_API_KEY` (optionally `ANTHROPIC_MODEL`)
 3. Create the real mailbox for `hello@triviumtutors.com`. Replies and the footer contact point at it.
 4. Have a lawyer review /privacy and /terms for the company's legal entity and jurisdiction. They are sensible drafts, not legal advice.
 5. Send a real test request and confirm email, Slack and the receipt all arrive.

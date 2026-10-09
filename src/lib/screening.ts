@@ -1,3 +1,6 @@
+import Anthropic from "@anthropic-ai/sdk";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
+import { z } from "zod";
 import { serviceById } from "@/lib/services";
 import type { RequestInput, RequestMeta } from "@/lib/request";
 
@@ -5,7 +8,7 @@ import type { RequestInput, RequestMeta } from "@/lib/request";
 // check. Three layers, cheapest first:
 //   1. Rules that need no AI: honeypot, filled-in-too-fast, link stuffing,
 //      keyboard mash, throwaway email domains.
-//   2. An AI read (OpenAI) of what the person actually wrote: is this a real
+//   2. An AI read (Anthropic Claude) of what the person actually wrote: is this a real
 //      customer, and is it a request we can honestly help with?
 //   3. The verdict, which decides who hears about it.
 //
@@ -85,11 +88,32 @@ Return a JSON object with exactly these keys:
 - "reasons": array of at most 3 short strings explaining the classification.
 - "summary": one neutral sentence the team can skim, describing what the person wants. Do not repeat contact details.`;
 
-type AiResult = { genuine: number; spam: boolean; integrity_violation: boolean; reasons: string[]; summary: string };
+// The shape Claude must answer in. Structured outputs guarantee valid JSON of
+// exactly this form, so there is no hand-rolled parsing to get wrong. Numeric
+// ranges are not expressible in the schema, so `genuine` is clamped afterwards.
+const AiSchema = z.object({
+  genuine: z.number().int(),
+  spam: z.boolean(),
+  integrity_violation: z.boolean(),
+  reasons: z.array(z.string()),
+  summary: z.string(),
+});
+type AiResult = z.infer<typeof AiSchema>;
+
+let client: Anthropic | null | undefined;
+
+/** The Claude client, or null (screening stays off) until ANTHROPIC_API_KEY is set. */
+function anthropic(): Anthropic | null {
+  if (client !== undefined) return client;
+  // A person is waiting on the form, so fail fast: 15 s, one retry. Any failure
+  // falls through to "review" (a human reads it), never to a rejection.
+  client = process.env.ANTHROPIC_API_KEY ? new Anthropic({ timeout: 15_000, maxRetries: 1 }) : null;
+  return client;
+}
 
 async function aiScreen(input: RequestInput): Promise<AiResult | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  const c = anthropic();
+  if (!c) return null;
   const service = serviceById(input.service);
   const userContent = [
     "<<<REQUEST",
@@ -106,41 +130,43 @@ async function aiScreen(input: RequestInput): Promise<AiResult | null> {
     `Details: ${input.details}`,
     "REQUEST>>>",
   ].join("\n");
+
+  // Defaults to the most capable model at low effort: this is one short
+  // classification per request, so the cost is small and the judgement on
+  // borderline "help" requests is the point. Set ANTHROPIC_MODEL to something
+  // cheaper (e.g. claude-haiku-4-5) to trade judgement for price.
+  const model = process.env.ANTHROPIC_MODEL || "claude-opus-5-5";
   try {
-    const res = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        // gpt-4o-mini is the model confirmed against GET /v1/models in the
-        // sibling TwendeTrips project. Override with OPENAI_MODEL if needed.
-        model: process.env.OPENAI_MODEL || "gpt-4o-mini",
-        temperature: 0,
-        max_tokens: 300,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userContent },
-        ],
-      }),
-      signal: AbortSignal.timeout(12000),
+    const response = await c.messages.parse({
+      model,
+      max_tokens: 2000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: "user", content: userContent }],
+      output_config: {
+        // Haiku 4.5 does not take an effort setting.
+        ...(model.startsWith("claude-haiku") ? {} : { effort: "low" as const }),
+        format: zodOutputFormat(AiSchema),
+      },
     });
-    if (!res.ok) {
-      console.error("[screening] OpenAI returned", res.status, (await res.text()).slice(0, 200));
+    if (response.stop_reason === "refusal") {
+      console.error("[screening] Claude declined to classify this request", response.stop_details?.category ?? "");
       return null;
     }
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const raw = JSON.parse(data.choices?.[0]?.message?.content ?? "{}") as Partial<AiResult>;
-    const genuine = typeof raw.genuine === "number" ? Math.max(0, Math.min(100, Math.round(raw.genuine))) : NaN;
-    if (Number.isNaN(genuine) || typeof raw.spam !== "boolean" || typeof raw.integrity_violation !== "boolean") return null;
+    const raw = response.parsed_output;
+    if (!raw) {
+      console.error("[screening] no parsable answer, stop_reason:", response.stop_reason);
+      return null;
+    }
     return {
-      genuine,
+      genuine: Math.max(0, Math.min(100, raw.genuine)),
       spam: raw.spam,
       integrity_violation: raw.integrity_violation,
-      reasons: Array.isArray(raw.reasons) ? raw.reasons.filter((r): r is string => typeof r === "string").slice(0, 3).map((r) => r.slice(0, 160)) : [],
-      summary: typeof raw.summary === "string" ? raw.summary.slice(0, 300) : "",
+      reasons: raw.reasons.slice(0, 3).map((r) => r.slice(0, 160)),
+      summary: raw.summary.slice(0, 300),
     };
   } catch (err) {
-    console.error("[screening] AI screen failed", err);
+    if (err instanceof Anthropic.APIError) console.error("[screening] Claude API error", err.status, err.message.slice(0, 200));
+    else console.error("[screening] AI screen failed", err);
     return null;
   }
 }

@@ -27,7 +27,7 @@ export default function Privacy() {
       <p>We use a small number of service providers to run the site. They process data only to provide their service to us:</p>
       <ul>
         <li>Cloudflare, for the Turnstile security check (and DNS for the site).</li>
-        <li>OpenAI, which receives the text of your request so an automated check can tell whether it is genuine and something we offer. We do not use it to profile you or for marketing.</li>
+        <li>Anthropic, which receives the text of your request so an automated check can tell whether it is genuine and something we offer. We do not use it to profile you or for marketing.</li>
         <li>Resend, which delivers our emails.</li>
         <li>Slack, where our team is notified of new requests.</li>
         <li>Supabase, the database where we keep a copy of each request.</li>
