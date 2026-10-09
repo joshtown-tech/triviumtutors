@@ -28,6 +28,7 @@ export function Footer() {
           <ul className="mt-3 space-y-2 text-sm text-cream/85">
             <li><a href={`mailto:${CONTACT}`} className="hover:text-gold">{CONTACT}</a></li>
             <li><Link href="/privacy" className="hover:text-gold">Privacy</Link></li>
+            <li><Link href="/refunds" className="hover:text-gold">Revisions and refunds</Link></li>
             <li><Link href="/terms" className="hover:text-gold">Terms</Link></li>
           </ul>
         </div>

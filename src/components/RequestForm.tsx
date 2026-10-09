@@ -474,7 +474,7 @@ export function RequestForm({ initialService, initialWords }: { initialService?:
               <option value="">Choose one</option>
               {PAYMENT_METHODS.map((p) => <option key={p}>{p}</option>)}
             </select>
-            <p className={hint}>Nothing is charged here. We send an invoice or payment link once we have agreed the price. We never ask for card details or passwords on this form.</p>
+            <p className={hint}>Nothing is charged here. We send an invoice or payment link once we have agreed the price, and work starts when payment arrives. We never ask for card details or passwords on this form. See our <Link href="/refunds" target="_blank" className="underline hover:text-ink">revisions and refunds</Link>.</p>
           </div>
 
           {/* Honeypot: invisible to people, tempting to bots. */}

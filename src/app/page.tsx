@@ -13,7 +13,7 @@ const STEPS = [
 const TRUST = [
   { title: "A person reads every request", body: "A real person reads and replies, within one business day." },
   { title: "Your work stays yours", body: "We teach, coach and edit. We never write it for you." },
-  { title: "Price confirmed first", body: "See a live estimate, and agree the final price before any work starts." },
+  { title: "Price confirmed first", body: "See a live estimate and agree the final price first. One free revision on edits and reviews." },
   { title: "Fits your timezone", body: "Online sessions for the US, UK, Europe, Australia and Latin America." },
 ];
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Prose } from "@/components/Prose";
 
 const CONTACT = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "hello@triviumtutors.com";
@@ -21,6 +22,9 @@ export default function Terms() {
 
       <h2>Requests and pricing</h2>
       <p>Sending a request is not a contract. A booking is confirmed when we agree scope, price and timing with you in writing. We will tell you the price before any work starts.</p>
+
+      <h2>Revisions and refunds</h2>
+      <p>Free revisions and refunds are set out on our <Link href="/refunds">revisions and refunds page</Link>, which forms part of these terms. Payment is requested before work starts.</p>
 
       <h2>Results</h2>
       <p>We work hard to help you improve, but we cannot guarantee a particular grade, admission or outcome, because those depend on you and on decisions we do not control.</p>
